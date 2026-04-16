@@ -44,8 +44,9 @@ class _KanbanColumnWidgetState extends State<KanbanColumnWidget> {
 
   int? _insertionIndex;
 
-
   double? _pointerLocalY;
+
+  double _lastPointerGlobalY = double.negativeInfinity;
 
   final _scrollController = ScrollController();
 
@@ -70,31 +71,55 @@ class _KanbanColumnWidgetState extends State<KanbanColumnWidget> {
     final cards = widget.indicators;
     if (cards.isEmpty) return 0;
 
-    final midpoints = <double>[];
-    for (final card in cards) {
-      final key = _cardKeys[card.indicatorToMoId];
+    final isDraggingDown = globalPointerOffset.dy >= _lastPointerGlobalY;
+    final thresholdFraction = isDraggingDown ? 0.25 : 0.75;
+
+    for (int i = 0; i < cards.length; i++) {
+      final key = _cardKeys[cards[i].indicatorToMoId];
       final ctx = key?.currentContext;
       if (ctx == null) continue;
       final box = ctx.findRenderObject() as RenderBox?;
       if (box == null) continue;
       final topLeft = box.localToGlobal(Offset.zero);
-      midpoints.add(topLeft.dy + box.size.height / 2);
+      if (globalPointerOffset.dy < topLeft.dy + box.size.height * thresholdFraction) {
+        return i;
+      }
     }
-
-    if (midpoints.isEmpty) return cards.length;
-
-    for (int i = 0; i < midpoints.length; i++) {
-      if (globalPointerOffset.dy < midpoints[i]) return i;
-    }
-    return midpoints.length;
+    return cards.length;
   }
 
 
 
-  double? _localY(Offset globalPointerOffset) {
-    final box = context.findRenderObject() as RenderBox?;
-    if (box == null) return null;
-    return box.globalToLocal(globalPointerOffset).dy;
+  double? _boundaryLocalY(int insertIndex) {
+    final columnBox = context.findRenderObject() as RenderBox?;
+    if (columnBox == null) return null;
+    final cards = widget.indicators;
+    if (cards.isEmpty) return null;
+
+    double globalY;
+    if (insertIndex <= 0) {
+      final key = _cardKeys[cards.first.indicatorToMoId];
+      final box = key?.currentContext?.findRenderObject() as RenderBox?;
+      if (box == null) return null;
+      globalY = box.localToGlobal(Offset.zero).dy;
+    } else if (insertIndex >= cards.length) {
+      final key = _cardKeys[cards.last.indicatorToMoId];
+      final box = key?.currentContext?.findRenderObject() as RenderBox?;
+      if (box == null) return null;
+      globalY = box.localToGlobal(Offset(0, box.size.height)).dy;
+    } else {
+      final prevBox = _cardKeys[cards[insertIndex - 1].indicatorToMoId]
+          ?.currentContext
+          ?.findRenderObject() as RenderBox?;
+      final nextBox = _cardKeys[cards[insertIndex].indicatorToMoId]
+          ?.currentContext
+          ?.findRenderObject() as RenderBox?;
+      if (prevBox == null || nextBox == null) return null;
+      final prevBottom = prevBox.localToGlobal(Offset(0, prevBox.size.height)).dy;
+      final nextTop = nextBox.localToGlobal(Offset.zero).dy;
+      globalY = (prevBottom + nextTop) / 2;
+    }
+    return columnBox.globalToLocal(Offset(0, globalY)).dy;
   }
 
 
@@ -137,19 +162,23 @@ class _KanbanColumnWidgetState extends State<KanbanColumnWidget> {
       onWillAcceptWithDetails: (_) => true,
       onMove: (details) {
         setState(() {
-          _insertionIndex = _calcInsertIndex(details.offset);
-          _pointerLocalY = _localY(details.offset);
+          final idx = _calcInsertIndex(details.offset);
+          _insertionIndex = idx;
+          _pointerLocalY = _boundaryLocalY(idx);
+          _lastPointerGlobalY = details.offset.dy;
         });
       },
       onLeave: (_) => setState(() {
         _insertionIndex = null;
         _pointerLocalY = null;
+        _lastPointerGlobalY = double.negativeInfinity;
       }),
       onAcceptWithDetails: (details) {
         final pos = _insertionIndex ?? widget.indicators.length;
         setState(() {
           _insertionIndex = null;
           _pointerLocalY = null;
+          _lastPointerGlobalY = double.negativeInfinity;
         });
         widget.onCardDropped(details.data, widget.columnId, pos);
       },
