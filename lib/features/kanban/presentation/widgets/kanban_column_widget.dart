@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/indicator.dart';
 import 'kanban_card_widget.dart';
 
@@ -109,13 +110,14 @@ class _KanbanColumnWidgetState extends State<KanbanColumnWidget> {
       width: 288,
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F7FC),
+        color: AppColors.columnBg,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.cardBorder.withValues(alpha: 0.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.07),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 8,
-            offset: const Offset(0, 3),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -167,13 +169,12 @@ class _KanbanColumnWidgetState extends State<KanbanColumnWidget> {
                 y: _pointerLocalY!,
                 color: widget.columnColor,
               ),
-            // Subtle column highlight when a card hovers over it.
             if (isHovering)
               Positioned.fill(
                 child: IgnorePointer(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: widget.columnColor.withValues(alpha: 0.06),
+                      color: widget.columnColor.withValues(alpha: 0.08),
                       borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(12),
                         bottomRight: Radius.circular(12),
@@ -292,12 +293,11 @@ class _ColumnHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+      padding: const EdgeInsets.fromLTRB(14, 11, 12, 11),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [color, color.withValues(alpha: 0.82)],
+        color: AppColors.columnBg,
+        border: Border(
+          bottom: BorderSide(color: color.withValues(alpha: 0.5), width: 2),
         ),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(12),
@@ -309,8 +309,8 @@ class _ColumnHeader extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: color,
               shape: BoxShape.circle,
             ),
           ),
@@ -318,9 +318,9 @@ class _ColumnHeader extends StatelessWidget {
           Expanded(
             child: Text(
               name,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w600,
                 fontSize: 13,
                 letterSpacing: 0.2,
               ),
@@ -328,7 +328,7 @@ class _ColumnHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          _CountBadge(count: count),
+          _CountBadge(count: count, color: color),
         ],
       ),
     );
@@ -337,23 +337,24 @@ class _ColumnHeader extends StatelessWidget {
 
 class _CountBadge extends StatelessWidget {
   final int count;
+  final Color color;
 
-  const _CountBadge({required this.count});
+  const _CountBadge({required this.count, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.22),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         '$count',
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: color,
           fontSize: 12,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

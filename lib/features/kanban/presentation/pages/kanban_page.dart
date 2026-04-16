@@ -134,13 +134,9 @@ class _KanbanAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       flexibleSpace: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0A1F44),
-              Color(0xFF1565C0),
-            ],
+          color: Color(0xFF1E1E1E),
+          border: Border(
+            bottom: BorderSide(color: Color(0xFF333333), width: 1),
           ),
         ),
       ),
@@ -150,12 +146,12 @@ class _KanbanAppBar extends StatelessWidget implements PreferredSizeWidget {
           Container(
             padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: AppColors.cardBorder.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
               Icons.dashboard_rounded,
-              color: Colors.white,
+              color: AppColors.textSecondary,
               size: 20,
             ),
           ),
@@ -167,7 +163,7 @@ class _KanbanAppBar extends StatelessWidget implements PreferredSizeWidget {
               const Text(
                 'KPI-Drive',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
@@ -177,7 +173,7 @@ class _KanbanAppBar extends StatelessWidget implements PreferredSizeWidget {
                 Text(
                   '$columnCount колонок · $indicatorCount задач',
                   style: const TextStyle(
-                    color: Colors.white60,
+                    color: AppColors.textSecondary,
                     fontSize: 11,
                   ),
                 )
@@ -185,7 +181,7 @@ class _KanbanAppBar extends StatelessWidget implements PreferredSizeWidget {
                 const Text(
                   'Канбан-доска задач',
                   style: TextStyle(
-                    color: Colors.white60,
+                    color: AppColors.textSecondary,
                     fontSize: 11,
                   ),
                 ),
@@ -202,14 +198,14 @@ class _KanbanAppBar extends StatelessWidget implements PreferredSizeWidget {
                 width: 18,
                 height: 18,
                 child: CircularProgressIndicator(
-                  color: Colors.white,
+                  color: AppColors.textSecondary,
                   strokeWidth: 2,
                 ),
               ),
             ),
           ),
         IconButton(
-          icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+          icon: const Icon(Icons.refresh_rounded, color: AppColors.textSecondary),
           tooltip: 'Обновить данные',
           onPressed: isBusy
               ? null

@@ -14,10 +14,10 @@ class KanbanCardGhost extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       height: 68,
       decoration: BoxDecoration(
-        color: AppColors.accent.withValues(alpha: 0.08),
+        color: AppColors.cardBg.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: AppColors.accent.withValues(alpha: 0.3),
+          color: AppColors.cardBorder,
           width: 1.5,
           style: BorderStyle.solid,
         ),
@@ -40,16 +40,17 @@ class KanbanCardFeedback extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 10,
+      elevation: 12,
       borderRadius: BorderRadius.circular(10),
-      shadowColor: accentColor.withValues(alpha: 0.4),
+      shadowColor: Colors.black.withValues(alpha: 0.5),
+      color: AppColors.cardBg,
       child: Container(
         width: 264,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.cardBg,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: accentColor, width: 2),
+          border: Border.all(color: accentColor.withValues(alpha: 0.7), width: 1.5),
         ),
         child: Row(
           children: [
@@ -98,17 +99,17 @@ class KanbanCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 150),
-      opacity: isDragging ? 0.35 : 1.0,
+      opacity: isDragging ? 0.3 : 1.0,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.cardBg,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.cardBorder, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 6,
+              color: Colors.black.withValues(alpha: 0.25),
+              blurRadius: 4,
               offset: const Offset(0, 2),
             ),
           ],
@@ -119,7 +120,7 @@ class KanbanCardWidget extends StatelessWidget {
             children: [
               // Left accent bar
               Container(
-                width: 4,
+                width: 3,
                 decoration: BoxDecoration(
                   color: accentColor,
                   borderRadius: const BorderRadius.only(
@@ -139,7 +140,7 @@ class KanbanCardWidget extends StatelessWidget {
                         indicator.name,
                         style: const TextStyle(
                           fontSize: 13,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           color: AppColors.textPrimary,
                           height: 1.3,
                         ),
@@ -152,14 +153,14 @@ class KanbanCardWidget extends StatelessWidget {
                           Icon(
                             Icons.tag,
                             size: 11,
-                            color: Colors.grey[400],
+                            color: AppColors.textMuted,
                           ),
                           const SizedBox(width: 3),
                           Text(
                             '${indicator.indicatorToMoId}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 11,
-                              color: Colors.grey[400],
+                              color: AppColors.textMuted,
                             ),
                           ),
                           const Spacer(),
@@ -169,14 +170,14 @@ class KanbanCardWidget extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: accentColor.withValues(alpha: 0.08),
+                              color: accentColor.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               '№${indicator.order}',
                               style: TextStyle(
                                 fontSize: 10,
-                                color: accentColor,
+                                color: accentColor.withValues(alpha: 0.9),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -195,8 +196,8 @@ class KanbanCardWidget extends StatelessWidget {
                       ? Icons.drag_indicator
                       : Icons.lock_outline,
                   color: indicator.allowEdit
-                      ? Colors.grey[300]
-                      : Colors.grey[400],
+                      ? AppColors.textMuted
+                      : AppColors.textMuted.withValues(alpha: 0.6),
                   size: 16,
                 ),
               ),

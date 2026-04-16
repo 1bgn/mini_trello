@@ -125,11 +125,12 @@ class _SavingBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.9),
+        color: AppColors.columnBg,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.cardBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -142,7 +143,7 @@ class _SavingBadge extends StatelessWidget {
             width: 12,
             height: 12,
             child: CircularProgressIndicator(
-              color: Colors.white,
+              color: AppColors.textSecondary,
               strokeWidth: 1.5,
             ),
           ),
@@ -150,7 +151,7 @@ class _SavingBadge extends StatelessWidget {
           Text(
             'Сохранение…',
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -180,7 +181,7 @@ class _EmptyBoard extends StatelessWidget {
           Icon(
             Icons.dashboard_outlined,
             size: 72,
-            color: AppColors.primary.withValues(alpha: 0.25),
+            color: AppColors.textMuted,
           ),
           const SizedBox(height: 16),
           const Text(
