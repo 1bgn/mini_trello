@@ -78,32 +78,36 @@ class _KanbanBoardWidgetState extends State<KanbanBoardWidget> {
               );
             }
           },
-          child: ListView.builder(
+          child: Scrollbar(
             controller: _scrollController,
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
-            itemCount: columnIds.length,
-            itemBuilder: (context, index) {
-              final columnId = columnIds[index];
-              final cards = columns[columnId] ?? [];
-              final name = columnNames[columnId] ?? 'Папка ${index + 1}';
-              final color =
-                  AppColors.columnColors[index % AppColors.columnColors.length];
+            thumbVisibility: true,
+            trackVisibility: true,
+            child: ListView.builder(
+              controller: _scrollController,
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(12, 16, 12, 32),
+              itemCount: columnIds.length,
+              itemBuilder: (context, index) {
+                final columnId = columnIds[index];
+                final cards = columns[columnId] ?? [];
+                final name = columnNames[columnId] ?? 'Папка ${index + 1}';
+                final color =
+                    AppColors.columnColors[index % AppColors.columnColors.length];
 
-              return KanbanColumnWidget(
-                key: ValueKey(columnId),
-                columnId: columnId,
-                columnName: name,
-                indicators: cards,
-                columnColor: color,
-                colorIndex: index,
-                onCardDropped: _onCardDropped,
-              );
-            },
+                return KanbanColumnWidget(
+                  key: ValueKey(columnId),
+                  columnId: columnId,
+                  columnName: name,
+                  indicators: cards,
+                  columnColor: color,
+                  colorIndex: index,
+                  onCardDropped: _onCardDropped,
+                );
+              },
+            ),
           ),
         ),
 
-        // Saving overlay indicator (top-right corner)
         if (widget.state.isSaving)
           Positioned(
             top: 12,

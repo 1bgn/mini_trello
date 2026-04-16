@@ -32,36 +32,59 @@ class _KanbanPageView extends StatelessWidget {
 
   void _handleListener(BuildContext context, KanbanState state) {
     if (state is KanbanSaveError) {
-      // The bloc already reverts to previousState after emitting this error.
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.white, size: 18),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  state.message,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: AppColors.error,
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-            label: 'Повторить',
-            textColor: Colors.white,
-            onPressed: () {
-              context
-                  .read<KanbanBloc>()
-                  .add(const RefreshIndicatorsEvent());
-            },
-          ),
-        ),
+        _buildSaveErrorSnackBar(context, state),
       );
     }
+  }
+
+  SnackBar _buildSaveErrorSnackBar(BuildContext context, KanbanSaveError state) {
+    // Permission errors: brief, informational, no retry.
+    if (state.isPermissionError) {
+      return SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.lock_outline, color: Colors.white, size: 18),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                state.message,
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.grey[700],
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+      );
+    }
+
+    // Network / server errors: longer, with retry.
+    return SnackBar(
+      content: Row(
+        children: [
+          const Icon(Icons.error_outline, color: Colors.white, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              state.message,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: AppColors.error,
+      duration: const Duration(seconds: 5),
+      behavior: SnackBarBehavior.floating,
+      action: SnackBarAction(
+        label: 'Повторить',
+        textColor: Colors.white,
+        onPressed: () =>
+            context.read<KanbanBloc>().add(const RefreshIndicatorsEvent()),
+      ),
+    );
   }
 
   Widget _buildScaffold(BuildContext context, KanbanState state) {
@@ -72,24 +95,18 @@ class _KanbanPageView extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, KanbanState state) {
-    if (state is KanbanLoading) {
-      return const _LoadingView();
-    }
-    if (state is KanbanError) {
-      return _ErrorView(
-        message: state.message,
-        onRetry: () =>
-            context.read<KanbanBloc>().add(const LoadIndicatorsEvent()),
-      );
-    }
-    if (state is KanbanLoaded) {
-      return KanbanBoardWidget(state: state);
-    }
-    // KanbanSaveError: body is shown by the listener; show previous board.
-    if (state is KanbanSaveError) {
-      return KanbanBoardWidget(state: state.previousState);
-    }
-    return const SizedBox.shrink();
+    return switch (state) {
+      KanbanInitial() => const SizedBox.shrink(),
+      KanbanLoading() => const _LoadingView(),
+      KanbanLoaded() => KanbanBoardWidget(state: state),
+      KanbanSaveError(:final previousState) =>
+        KanbanBoardWidget(state: previousState),
+      KanbanError(:final message) => _ErrorView(
+          message: message,
+          onRetry: () =>
+              context.read<KanbanBloc>().add(const LoadIndicatorsEvent()),
+        ),
+    };
   }
 }
 
@@ -105,15 +122,14 @@ class _KanbanAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBusy =
-        state is KanbanLoading ||
-        (state is KanbanLoaded && (state as KanbanLoaded).isSaving);
-    final indicatorCount =
-        state is KanbanLoaded ? (state as KanbanLoaded).indicators.length : 0;
-    final columnCount =
-        state is KanbanLoaded
-            ? (state as KanbanLoaded).columns.length
-            : 0;
+    final isBusy = switch (state) {
+      KanbanLoading() => true,
+      KanbanLoaded(:final isSaving) => isSaving,
+      _ => false,
+    };
+    final loaded = state is KanbanLoaded ? state as KanbanLoaded : null;
+    final indicatorCount = loaded?.indicators.length ?? 0;
+    final columnCount = loaded?.columns.length ?? 0;
 
     return AppBar(
       flexibleSpace: Container(

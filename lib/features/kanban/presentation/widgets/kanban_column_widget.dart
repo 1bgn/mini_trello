@@ -189,14 +189,18 @@ class _KanbanColumnWidgetState extends State<KanbanColumnWidget> {
   }
 
   Widget _buildCardList() {
-    return ListView.builder(
+    return Scrollbar(
       controller: _scrollController,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: widget.indicators.length,
-      itemBuilder: (context, index) {
-        final indicator = widget.indicators[index];
-        return _buildDraggableCard(indicator);
-      },
+      thumbVisibility: true,
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: widget.indicators.length,
+        itemBuilder: (context, index) {
+          final indicator = widget.indicators[index];
+          return _buildDraggableCard(indicator);
+        },
+      ),
     );
   }
 

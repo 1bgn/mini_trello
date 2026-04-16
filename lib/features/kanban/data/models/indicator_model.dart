@@ -6,6 +6,7 @@ class IndicatorModel extends Indicator {
     super.parentId,
     required super.name,
     required super.order,
+    super.allowEdit = true,
   });
 
   factory IndicatorModel.fromJson(Map<String, dynamic> json) {
@@ -23,6 +24,7 @@ class IndicatorModel extends Indicator {
           ? json['name'].toString().trim()
           : 'Без названия',
       order: json['order'] != null ? _parseInt(json['order']) : 0,
+      allowEdit: json['allow_edit'] == true || json['allow_edit'] == 1,
     );
   }
 
@@ -32,12 +34,14 @@ class IndicatorModel extends Indicator {
     int? parentId,
     String? name,
     int? order,
+    bool? allowEdit,
   }) {
     return IndicatorModel(
       indicatorToMoId: indicatorToMoId ?? this.indicatorToMoId,
       parentId: parentId ?? this.parentId,
       name: name ?? this.name,
       order: order ?? this.order,
+      allowEdit: allowEdit ?? this.allowEdit,
     );
   }
 

@@ -7,7 +7,6 @@ abstract class KanbanRepository {
 
   Future<Either<Failure, void>> saveIndicatorField({
     required int indicatorToMoId,
-    required String fieldName,
-    required String fieldValue,
+    required Map<String, String> fields,
   });
 }

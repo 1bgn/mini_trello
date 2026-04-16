@@ -24,32 +24,27 @@ class KanbanMockDataSource implements KanbanRemoteDataSource {
   @override
   Future<void> saveIndicatorField({
     required int indicatorToMoId,
-    required String fieldName,
-    required String fieldValue,
+    required Map<String, String> fields,
   }) async {
     await _fakeDelay(ms: 300);
 
     final idx = _store.indexWhere((i) => i.indicatorToMoId == indicatorToMoId);
     if (idx == -1) return; // unknown id — silently ignore
 
-    final current = _store[idx];
-    final updated = switch (fieldName) {
-      'parent_id' => IndicatorModel(
-          indicatorToMoId: current.indicatorToMoId,
-          parentId: int.tryParse(fieldValue) ?? current.parentId,
-          name: current.name,
-          order: current.order,
-        ),
-      'order' => IndicatorModel(
-          indicatorToMoId: current.indicatorToMoId,
-          parentId: current.parentId,
-          name: current.name,
-          order: int.tryParse(fieldValue) ?? current.order,
-        ),
-      _ => current,
-    };
+    var current = _store[idx];
+    for (final entry in fields.entries) {
+      current = switch (entry.key) {
+        'parent_id' => current.copyWith(
+            parentId: int.tryParse(entry.value) ?? current.parentId,
+          ),
+        'order' => current.copyWith(
+            order: int.tryParse(entry.value) ?? current.order,
+          ),
+        _ => current,
+      };
+    }
 
-    _store[idx] = updated;
+    _store[idx] = current;
   }
 
   // ── Seed data ──────────────────────────────────────────────────────────────

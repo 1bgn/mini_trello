@@ -40,8 +40,7 @@ void main() {
 
     await datasource.saveIndicatorField(
       indicatorToMoId: task.indicatorToMoId,
-      fieldName: 'parent_id',
-      fieldValue: otherFolder.indicatorToMoId.toString(),
+      fields: {'parent_id': otherFolder.indicatorToMoId.toString()},
     );
 
     final after = await datasource.getIndicators();
@@ -55,8 +54,7 @@ void main() {
 
     await datasource.saveIndicatorField(
       indicatorToMoId: task.indicatorToMoId,
-      fieldName: 'order',
-      fieldValue: '99',
+      fields: {'order': '99'},
     );
 
     final after = await datasource.getIndicators();
@@ -64,12 +62,32 @@ void main() {
     expect(updated.order, 99);
   });
 
+  test('saveIndicatorField updates parent_id and order together', () async {
+    final before = await datasource.getIndicators();
+    final task = before.firstWhere((i) => i.parentId != null);
+    final originalParent = task.parentId!;
+    final otherFolder = before
+        .firstWhere((i) => i.indicatorToMoId != originalParent && i.parentId == null);
+
+    await datasource.saveIndicatorField(
+      indicatorToMoId: task.indicatorToMoId,
+      fields: {
+        'parent_id': otherFolder.indicatorToMoId.toString(),
+        'order': '5',
+      },
+    );
+
+    final after = await datasource.getIndicators();
+    final updated = after.firstWhere((i) => i.indicatorToMoId == task.indicatorToMoId);
+    expect(updated.parentId, otherFolder.indicatorToMoId);
+    expect(updated.order, 5);
+  });
+
   test('saveIndicatorField with unknown id does not throw', () async {
     await expectLater(
       datasource.saveIndicatorField(
         indicatorToMoId: 0, // non-existent
-        fieldName: 'parent_id',
-        fieldValue: '100',
+        fields: {'parent_id': '100'},
       ),
       completes,
     );

@@ -171,8 +171,7 @@ void main() {
       await expectLater(
         dataSource.saveIndicatorField(
           indicatorToMoId: 1001,
-          fieldName: 'parent_id',
-          fieldValue: '200',
+          fields: {'parent_id': '200', 'order': '3'},
         ),
         completes,
       );
@@ -183,8 +182,7 @@ void main() {
       await expectLater(
         dataSource.saveIndicatorField(
           indicatorToMoId: 1001,
-          fieldName: 'order',
-          fieldValue: '3',
+          fields: {'order': '3'},
         ),
         completes,
       );
@@ -195,8 +193,7 @@ void main() {
       await expectLater(
         dataSource.saveIndicatorField(
           indicatorToMoId: 9999,
-          fieldName: 'order',
-          fieldValue: '1',
+          fields: {'parent_id': '200', 'order': '1'},
         ),
         throwsA(
           isA<ServerException>().having(
@@ -213,8 +210,7 @@ void main() {
       await expectLater(
         dataSource.saveIndicatorField(
           indicatorToMoId: 1,
-          fieldName: 'parent_id',
-          fieldValue: '2',
+          fields: {'parent_id': '2'},
         ),
         throwsA(isA<ServerException>()),
       );
@@ -225,8 +221,7 @@ void main() {
       await expectLater(
         dataSource.saveIndicatorField(
           indicatorToMoId: 1,
-          fieldName: 'order',
-          fieldValue: '1',
+          fields: {'order': '1'},
         ),
         throwsA(isA<NetworkException>()),
       );

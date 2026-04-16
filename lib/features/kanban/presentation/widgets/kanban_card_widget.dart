@@ -187,13 +187,17 @@ class KanbanCardWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              // Drag handle
+              // Drag handle or lock icon
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: Icon(
-                  Icons.drag_indicator,
-                  color: Colors.grey[300],
-                  size: 18,
+                  indicator.allowEdit
+                      ? Icons.drag_indicator
+                      : Icons.lock_outline,
+                  color: indicator.allowEdit
+                      ? Colors.grey[300]
+                      : Colors.grey[400],
+                  size: 16,
                 ),
               ),
             ],

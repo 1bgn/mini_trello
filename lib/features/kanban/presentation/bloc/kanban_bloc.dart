@@ -12,7 +12,7 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
   KanbanBloc({
     required this.getIndicatorsUseCase,
     required this.saveIndicatorFieldUseCase,
-  }) : super(const KanbanInitial()) {
+  }) : super(const KanbanState.initial()) {
     on<LoadIndicatorsEvent>(_onLoad);
     on<RefreshIndicatorsEvent>(_onRefresh);
     on<MoveCardEvent>(_onMoveCard);
@@ -22,11 +22,11 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     LoadIndicatorsEvent event,
     Emitter<KanbanState> emit,
   ) async {
-    emit(const KanbanLoading());
+    emit(const KanbanState.loading());
     final result = await getIndicatorsUseCase();
     result.fold(
-      (failure) => emit(KanbanError(failure.message)),
-      (indicators) => emit(KanbanLoaded(indicators: indicators)),
+      (failure) => emit(KanbanState.error(failure.message)),
+      (indicators) => emit(KanbanState.loaded(indicators: indicators)),
     );
   }
 
@@ -35,17 +35,16 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     Emitter<KanbanState> emit,
   ) async {
     final current = state;
-    // Show a subtle saving indicator while refreshing.
     if (current is KanbanLoaded) {
       emit(current.copyWith(isSaving: true));
     } else {
-      emit(const KanbanLoading());
+      emit(const KanbanState.loading());
     }
 
     final result = await getIndicatorsUseCase();
     result.fold(
-      (failure) => emit(KanbanError(failure.message)),
-      (indicators) => emit(KanbanLoaded(indicators: indicators)),
+      (failure) => emit(KanbanState.error(failure.message)),
+      (indicators) => emit(KanbanState.loaded(indicators: indicators)),
     );
   }
 
@@ -55,6 +54,25 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
   ) async {
     final current = state;
     if (current is! KanbanLoaded) return;
+
+    // --- Guard: non-editable card — show optimistic move then revert ---
+    if (!event.indicator.allowEdit) {
+      final optimistic = _recalculateOrders(
+        current.indicators,
+        event.indicator,
+        event.newParentId,
+        event.insertPosition,
+      );
+      emit(current.copyWith(indicators: optimistic));
+      await Future<void>.delayed(const Duration(milliseconds: 350));
+      emit(KanbanState.saveError(
+        message: 'Эта запись защищена от редактирования',
+        previousState: current,
+        isPermissionError: true,
+      ));
+      emit(current);
+      return;
+    }
 
     // --- Optimistic update ---
     final updatedIndicators = _recalculateOrders(
@@ -71,38 +89,27 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
       (i) => i.indicatorToMoId == event.indicator.indicatorToMoId,
     );
 
-    // --- Persist parent_id ---
-    final parentResult = await saveIndicatorFieldUseCase(
+    // --- Persist parent_id + order in one request ---
+    final saveResult = await saveIndicatorFieldUseCase(
       indicatorToMoId: moved.indicatorToMoId,
-      fieldName: 'parent_id',
-      fieldValue: moved.parentId.toString(),
+      fields: {
+        'parent_id': moved.parentId.toString(),
+        'order': moved.order.toString(),
+      },
     );
 
-    if (parentResult.isLeft()) {
-      final msg = parentResult.fold((f) => f.message, (_) => '');
-      // Emit error state for the listener, then immediately revert.
-      emit(KanbanSaveError(message: msg, previousState: current));
-      emit(current); // revert optimistic update
+    if (saveResult.isLeft()) {
+      final msg = saveResult.fold((f) => f.message, (_) => '');
+      emit(KanbanState.saveError(message: msg, previousState: current));
+      emit(current);
       return;
     }
 
-    // --- Persist order ---
-    final orderResult = await saveIndicatorFieldUseCase(
-      indicatorToMoId: moved.indicatorToMoId,
-      fieldName: 'order',
-      fieldValue: moved.order.toString(),
-    );
-
-    if (orderResult.isLeft()) {
-      final msg = orderResult.fold((f) => f.message, (_) => '');
-      emit(KanbanSaveError(message: msg, previousState: current));
-      emit(current); // revert optimistic update
-      return;
+    // Use the latest state so concurrent moves are not reverted.
+    final latest = state;
+    if (latest is KanbanLoaded) {
+      emit(latest.copyWith(isSaving: false));
     }
-
-    emit(
-      KanbanLoaded(indicators: updatedIndicators, isSaving: false),
-    );
   }
 
   /// Rebuilds the indicator list with reassigned sequential orders after a move.
@@ -112,33 +119,27 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     int newParentId,
     int insertPosition,
   ) {
-    // Remove the card being moved from the list.
     // Use List<Indicator>.from() to force the correct runtime type in DDC (web),
     // preventing "type 'Indicator' is not a subtype of type 'IndicatorModel'" errors.
     final rest = List<Indicator>.from(
         all.where((i) => i.indicatorToMoId != moving.indicatorToMoId));
 
-    // Build the new target column list (sorted, without the moving card).
     final targetItems = List<Indicator>.from(
         rest.where((i) => i.parentId == newParentId))
       ..sort((a, b) => a.order.compareTo(b.order));
 
-    // Insert the card at the requested position.
     final clampedIdx = insertPosition.clamp(0, targetItems.length);
     final movedWithNewParent = moving.copyWith(parentId: newParentId);
     targetItems.insert(clampedIdx, movedWithNewParent);
 
-    // Remove target-column cards from rest so we can add them back renumbered.
     final others = List<Indicator>.from(
         rest.where((i) => i.parentId != newParentId));
 
-    // Renumber target column 1, 2, 3 …
     final renumberedTarget = <Indicator>[];
     for (int i = 0; i < targetItems.length; i++) {
       renumberedTarget.add(targetItems[i].copyWith(order: i + 1));
     }
 
-    // Also renumber the source column if different.
     if (moving.parentId != null && moving.parentId != newParentId) {
       final srcItems = List<Indicator>.from(
           others.where((i) => i.parentId == moving.parentId))

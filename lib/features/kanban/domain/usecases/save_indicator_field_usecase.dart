@@ -9,13 +9,11 @@ class SaveIndicatorFieldUseCase {
 
   Future<Either<Failure, void>> call({
     required int indicatorToMoId,
-    required String fieldName,
-    required String fieldValue,
+    required Map<String, String> fields,
   }) {
     return repository.saveIndicatorField(
       indicatorToMoId: indicatorToMoId,
-      fieldName: fieldName,
-      fieldValue: fieldValue,
+      fields: fields,
     );
   }
 }

@@ -86,7 +86,7 @@ void main() {
         ]),
       );
 
-      bloc.add(const LoadIndicatorsEvent());
+      bloc.add(const KanbanEvent.load());
     });
 
     test('emits [Loading, KanbanError] on ServerFailure', () {
@@ -102,7 +102,7 @@ void main() {
         ]),
       );
 
-      bloc.add(const LoadIndicatorsEvent());
+      bloc.add(const KanbanEvent.load());
     });
 
     test('emits [Loading, KanbanError] on NetworkFailure', () {
@@ -118,7 +118,7 @@ void main() {
         ]),
       );
 
-      bloc.add(const LoadIndicatorsEvent());
+      bloc.add(const KanbanEvent.load());
     });
   });
 
@@ -177,23 +177,22 @@ void main() {
 
   group('MoveCardEvent', () {
     setUp(() {
-      // By default both saves succeed.
+      // By default save succeeds.
       when(
         () => mockSave(
           indicatorToMoId: any(named: 'indicatorToMoId'),
-          fieldName: any(named: 'fieldName'),
-          fieldValue: any(named: 'fieldValue'),
+          fields: any(named: 'fields'),
         ),
       ).thenAnswer((_) async => const Right<Failure, void>(null));
     });
 
     test('moves card to a different column optimistically then confirms', () async {
       when(() => mockGet()).thenAnswer((_) async => Right(_allIndicators));
-      bloc.add(const LoadIndicatorsEvent());
+      bloc.add(const KanbanEvent.load());
       await Future<void>.delayed(Duration.zero); // let bloc process
 
       bloc.add(
-        const MoveCardEvent(
+        const KanbanEvent.moveCard(
           indicator: _task1,
           newParentId: 200, // move from column 100 → 200
           insertPosition: 0,
@@ -209,37 +208,28 @@ void main() {
       final movedTask = col200.firstWhere((t) => t.indicatorToMoId == 1001);
       expect(movedTask.parentId, 200);
 
-      // saveIndicatorField must be called for parent_id and order
+      // saveIndicatorField must be called once with both fields
       verify(
         () => mockSave(
           indicatorToMoId: 1001,
-          fieldName: 'parent_id',
-          fieldValue: '200',
-        ),
-      ).called(1);
-      verify(
-        () => mockSave(
-          indicatorToMoId: 1001,
-          fieldName: 'order',
-          fieldValue: any(named: 'fieldValue'),
+          fields: any(named: 'fields'),
         ),
       ).called(1);
     });
 
     test('emits KanbanSaveError then reverts on parent_id save failure', () async {
-      // Override: parent_id save fails.
+      // Override: save fails.
       when(
         () => mockSave(
           indicatorToMoId: any(named: 'indicatorToMoId'),
-          fieldName: 'parent_id',
-          fieldValue: any(named: 'fieldValue'),
+          fields: any(named: 'fields'),
         ),
       ).thenAnswer(
         (_) async => const Left(ServerFailure('Нет связи')),
       );
 
       when(() => mockGet()).thenAnswer((_) async => Right(_allIndicators));
-      bloc.add(const LoadIndicatorsEvent());
+      bloc.add(const KanbanEvent.load());
       await Future<void>.delayed(Duration.zero);
 
       final stateBefore = bloc.state as KanbanLoaded;
@@ -248,7 +238,7 @@ void main() {
       final sub = bloc.stream.listen(emitted.add);
 
       bloc.add(
-        const MoveCardEvent(
+        const KanbanEvent.moveCard(
           indicator: _task1,
           newParentId: 200,
           insertPosition: 0,
@@ -272,14 +262,14 @@ void main() {
     test('refreshes data while keeping isSaving=true during load', () async {
       // Pre-load state
       when(() => mockGet()).thenAnswer((_) async => Right(_allIndicators));
-      bloc.add(const LoadIndicatorsEvent());
+      bloc.add(const KanbanEvent.load());
       await Future<void>.delayed(Duration.zero);
 
       when(() => mockGet()).thenAnswer((_) async => Right(_allIndicators));
 
       final states = <KanbanState>[];
       final sub = bloc.stream.listen(states.add);
-      bloc.add(const RefreshIndicatorsEvent());
+      bloc.add(const KanbanEvent.refresh());
       await Future<void>.delayed(Duration.zero);
       await sub.cancel();
 

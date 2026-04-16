@@ -27,14 +27,12 @@ class KanbanRepositoryImpl implements KanbanRepository {
   @override
   Future<Either<Failure, void>> saveIndicatorField({
     required int indicatorToMoId,
-    required String fieldName,
-    required String fieldValue,
+    required Map<String, String> fields,
   }) async {
     try {
       await remoteDataSource.saveIndicatorField(
         indicatorToMoId: indicatorToMoId,
-        fieldName: fieldName,
-        fieldValue: fieldValue,
+        fields: fields,
       );
       return const Right(null);
     } on ServerException catch (e) {
