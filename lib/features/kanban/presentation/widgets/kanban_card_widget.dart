@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/indicator.dart';
 
-/// The "ghost" shown in place of the card while it is being dragged.
 class KanbanCardGhost extends StatelessWidget {
   final Indicator indicator;
 
@@ -26,7 +25,6 @@ class KanbanCardGhost extends StatelessWidget {
   }
 }
 
-/// The floating widget that follows the pointer during drag.
 class KanbanCardFeedback extends StatelessWidget {
   final Indicator indicator;
   final Color accentColor;
@@ -82,7 +80,6 @@ class KanbanCardFeedback extends StatelessWidget {
   }
 }
 
-/// The actual card displayed in the column.
 class KanbanCardWidget extends StatelessWidget {
   final Indicator indicator;
   final Color accentColor;
@@ -118,7 +115,7 @@ class KanbanCardWidget extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Left accent bar
+
               Container(
                 width: 3,
                 decoration: BoxDecoration(
@@ -129,7 +126,7 @@ class KanbanCardWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              // Content
+
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
@@ -188,7 +185,7 @@ class KanbanCardWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              // Drag handle or lock icon
+
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: Icon(

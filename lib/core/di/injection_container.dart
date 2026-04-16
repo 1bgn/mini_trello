@@ -12,30 +12,30 @@ import '../network/api_client.dart';
 final sl = GetIt.instance;
 
 void initDependencies() {
-  // ── External ──────────────────────────────────────────────────────────────
-  // ApiClient is only needed when running against the real API.
+
+
   if (!AppConstants.useMock) {
     sl.registerLazySingleton<ApiClient>(() => ApiClient());
   }
 
-  // ── Data sources ──────────────────────────────────────────────────────────
-  // Switch between real HTTP and in-memory mock via --dart-define=USE_MOCK=true
+
+
   sl.registerLazySingleton<KanbanRemoteDataSource>(
     () => AppConstants.useMock
         ? KanbanMockDataSource()
         : KanbanRemoteDataSourceImpl(sl<ApiClient>()),
   );
 
-  // ── Repositories ──────────────────────────────────────────────────────────
+
   sl.registerLazySingleton<KanbanRepository>(
     () => KanbanRepositoryImpl(sl()),
   );
 
-  // ── Use cases ─────────────────────────────────────────────────────────────
+
   sl.registerLazySingleton(() => GetIndicatorsUseCase(sl()));
   sl.registerLazySingleton(() => SaveIndicatorFieldUseCase(sl()));
 
-  // ── Bloc (factory → new instance per page) ────────────────────────────────
+
   sl.registerFactory(
     () => KanbanBloc(
       getIndicatorsUseCase: sl(),

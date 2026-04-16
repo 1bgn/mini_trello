@@ -7,13 +7,13 @@ import 'interceptors/retry_interceptor.dart';
 class ApiClient {
   final Dio dio;
 
-  /// Production constructor — creates a pre-configured Dio instance.
+
   ApiClient() : dio = _buildDio() {
     _attachInterceptors(dio);
   }
 
-  /// Testing constructor — accepts an externally-configured Dio so that
-  /// [http_mock_adapter] (or any other HttpClientAdapter) can be injected.
+
+
   ApiClient.withDio(this.dio) {
     _attachInterceptors(dio);
   }
@@ -21,7 +21,7 @@ class ApiClient {
   Future<Response<dynamic>> post(String path, {dynamic data}) =>
       dio.post<dynamic>(path, data: data);
 
-  // ── Private helpers ────────────────────────────────────────────────────────
+
 
   static Dio _buildDio() => Dio(
         BaseOptions(

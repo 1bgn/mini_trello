@@ -40,7 +40,7 @@ class _KanbanPageView extends StatelessWidget {
   }
 
   SnackBar _buildSaveErrorSnackBar(BuildContext context, KanbanSaveError state) {
-    // Permission errors: brief, informational, no retry.
+
     if (state.isPermissionError) {
       return SnackBar(
         content: Row(
@@ -61,7 +61,7 @@ class _KanbanPageView extends StatelessWidget {
       );
     }
 
-    // Network / server errors: longer, with retry.
+
     return SnackBar(
       content: Row(
         children: [
@@ -110,8 +110,6 @@ class _KanbanPageView extends StatelessWidget {
   }
 }
 
-// ─── App Bar ─────────────────────────────────────────────────────────────────
-
 class _KanbanAppBar extends StatelessWidget implements PreferredSizeWidget {
   final KanbanState state;
 
@@ -142,7 +140,7 @@ class _KanbanAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       title: Row(
         children: [
-          // Logo block
+
           Container(
             padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
@@ -219,8 +217,6 @@ class _KanbanAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-// ─── Loading ──────────────────────────────────────────────────────────────────
-
 class _LoadingView extends StatelessWidget {
   const _LoadingView();
 
@@ -260,8 +256,6 @@ class _LoadingView extends StatelessWidget {
     );
   }
 }
-
-// ─── Error ────────────────────────────────────────────────────────────────────
 
 class _ErrorView extends StatelessWidget {
   final String message;

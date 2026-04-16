@@ -31,13 +31,13 @@ class _KanbanBoardWidgetState extends State<KanbanBoardWidget> {
     int targetColumnId,
     int insertPosition,
   ) {
-    // Guard: dropping to the exact same position in the same column is a no-op.
+
     final currentColumn = widget.state.columns[indicator.parentId] ?? [];
     if (indicator.parentId == targetColumnId) {
       final currentIdx = currentColumn.indexWhere(
         (i) => i.indicatorToMoId == indicator.indicatorToMoId,
       );
-      // If inserting above or at current position → same spot
+
       if (currentIdx == insertPosition || currentIdx + 1 == insertPosition) {
         return;
       }

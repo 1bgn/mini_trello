@@ -1,6 +1,6 @@
 class AppConstants {
-  /// Mock mode is ON by default.
-  /// Pass --dart-define=USE_MOCK=false to hit the real API.
+
+
   static const bool useMock =
       bool.fromEnvironment('USE_MOCK', defaultValue: false);
 

@@ -7,9 +7,9 @@ import '../models/indicator_model.dart';
 abstract class KanbanRemoteDataSource {
   Future<List<IndicatorModel>> getIndicators();
 
-  /// Saves one or more fields in a single request.
-  /// [fields] maps field_name → field_value; each entry becomes a
-  /// duplicate field_name / field_value pair in the multipart body.
+
+
+
   Future<void> saveIndicatorField({
     required int indicatorToMoId,
     required Map<String, String> fields,
@@ -42,7 +42,7 @@ class KanbanRemoteDataSourceImpl implements KanbanRemoteDataSource {
           .map(IndicatorModel.fromJson)
           .toList();
     } on DioException catch (e) {
-      _handleDioError(e); // Never returns — throws
+      _handleDioError(e);
     }
   }
 
@@ -58,8 +58,8 @@ class KanbanRemoteDataSourceImpl implements KanbanRemoteDataSource {
         MapEntry('period_end', AppConstants.periodEnd),
         MapEntry('period_key', AppConstants.periodKey),
         MapEntry('indicator_to_mo_id', indicatorToMoId.toString()),
-        // Each entry becomes a duplicate field_name / field_value pair,
-        // matching the API's multipart format.
+
+
         for (final entry in fields.entries) ...[
           MapEntry('field_name', entry.key),
           MapEntry('field_value', entry.value),
@@ -72,9 +72,9 @@ class KanbanRemoteDataSourceImpl implements KanbanRemoteDataSource {
         data: formData,
       );
 
-      // Check for application-level error in the response body.
-      // API returns STATUS: "OK"|"OTHER_ERROR" and MESSAGES.error list.
-      // Note: STATUS can be "OK" while MESSAGES.error is non-null (e.g. closed period).
+
+
+
       final data = response.data;
       if (data is Map) {
         final messages = data['MESSAGES'];
@@ -102,7 +102,7 @@ class KanbanRemoteDataSourceImpl implements KanbanRemoteDataSource {
     if (data == null) return [];
     if (data is List) return data;
     if (data is Map) {
-      // Real API wraps rows in DATA.rows (uppercase key)
+
       for (final topKey in ['DATA', 'data']) {
         final wrapper = data[topKey];
         if (wrapper is Map && wrapper['rows'] is List) {

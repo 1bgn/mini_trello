@@ -55,7 +55,7 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
     final current = state;
     if (current is! KanbanLoaded) return;
 
-    // --- Guard: non-editable card — show optimistic move then revert ---
+
     if (!event.indicator.allowEdit) {
       final optimistic = _recalculateOrders(
         current.indicators,
@@ -74,7 +74,7 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
       return;
     }
 
-    // --- Optimistic update ---
+
     final updatedIndicators = _recalculateOrders(
       current.indicators,
       event.indicator,
@@ -84,12 +84,12 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
 
     emit(current.copyWith(indicators: updatedIndicators, isSaving: true));
 
-    // Find the moved card's new order value.
+
     final moved = updatedIndicators.firstWhere(
       (i) => i.indicatorToMoId == event.indicator.indicatorToMoId,
     );
 
-    // --- Persist parent_id + order in one request ---
+
     final saveResult = await saveIndicatorFieldUseCase(
       indicatorToMoId: moved.indicatorToMoId,
       fields: {
@@ -105,22 +105,22 @@ class KanbanBloc extends Bloc<KanbanEvent, KanbanState> {
       return;
     }
 
-    // Use the latest state so concurrent moves are not reverted.
+
     final latest = state;
     if (latest is KanbanLoaded) {
       emit(latest.copyWith(isSaving: false));
     }
   }
 
-  /// Rebuilds the indicator list with reassigned sequential orders after a move.
+
   List<Indicator> _recalculateOrders(
     List<Indicator> all,
     Indicator moving,
     int newParentId,
     int insertPosition,
   ) {
-    // Use List<Indicator>.from() to force the correct runtime type in DDC (web),
-    // preventing "type 'Indicator' is not a subtype of type 'IndicatorModel'" errors.
+
+
     final rest = List<Indicator>.from(
         all.where((i) => i.indicatorToMoId != moving.indicatorToMoId));
 

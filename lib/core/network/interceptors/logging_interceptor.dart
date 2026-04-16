@@ -1,8 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-/// Pretty-prints Dio requests and responses.
-/// Active only in debug mode.
 class LoggingInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {

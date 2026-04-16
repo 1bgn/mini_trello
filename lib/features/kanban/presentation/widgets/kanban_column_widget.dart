@@ -10,16 +10,11 @@ typedef OnCardDropped = void Function(
   int insertPosition,
 );
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-/// True on web and native desktop — drag starts immediately (no hold delay).
 bool get _isDesktop =>
     kIsWeb ||
     defaultTargetPlatform == TargetPlatform.macOS ||
     defaultTargetPlatform == TargetPlatform.windows ||
     defaultTargetPlatform == TargetPlatform.linux;
-
-// ── Widget ────────────────────────────────────────────────────────────────────
 
 class KanbanColumnWidget extends StatefulWidget {
   final int columnId;
@@ -46,16 +41,16 @@ class KanbanColumnWidget extends StatefulWidget {
 }
 
 class _KanbanColumnWidgetState extends State<KanbanColumnWidget> {
-  /// Index where the insertion line will be rendered (null = not hovering).
+
   int? _insertionIndex;
 
-  /// Local Y of the pointer within this column (for drawing the insertion line).
+
   double? _pointerLocalY;
 
   final _scrollController = ScrollController();
 
-  /// Each card gets a GlobalKey on its outermost Container so we can
-  /// measure its screen position to compute the insertion index.
+
+
   final _cardKeys = <int, GlobalKey>{};
 
   GlobalKey _keyFor(int id) =>
@@ -67,10 +62,10 @@ class _KanbanColumnWidgetState extends State<KanbanColumnWidget> {
     super.dispose();
   }
 
-  // ── Insertion-index calculation ──────────────────────────────────────────
 
-  /// Converts a global pointer offset into the 0-based insertion index
-  /// (0 = before first card, n = after last card).
+
+
+
   int _calcInsertIndex(Offset globalPointerOffset) {
     final cards = widget.indicators;
     if (cards.isEmpty) return 0;
@@ -94,15 +89,15 @@ class _KanbanColumnWidgetState extends State<KanbanColumnWidget> {
     return midpoints.length;
   }
 
-  /// Converts a global pointer Y into a local Y within this widget
-  /// so the insertion line can be positioned correctly.
+
+
   double? _localY(Offset globalPointerOffset) {
     final box = context.findRenderObject() as RenderBox?;
     if (box == null) return null;
     return box.globalToLocal(globalPointerOffset).dy;
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
+
 
   @override
   Widget build(BuildContext context) {
@@ -134,9 +129,9 @@ class _KanbanColumnWidgetState extends State<KanbanColumnWidget> {
     );
   }
 
-  /// Single DragTarget that covers the ENTIRE card area.
-  /// Moving it outside the ListView is the key fix for cross-column drops:
-  /// the target is always hit-testable, regardless of scroll views.
+
+
+
   Widget _buildDropArea() {
     return DragTarget<Indicator>(
       onWillAcceptWithDetails: (_) => true,
@@ -163,7 +158,7 @@ class _KanbanColumnWidgetState extends State<KanbanColumnWidget> {
         return Stack(
           children: [
             _buildCardList(),
-            // Animated insertion line — follows the pointer.
+
             if (isHovering && _pointerLocalY != null)
               _InsertionLine(
                 y: _pointerLocalY!,
@@ -218,12 +213,12 @@ class _KanbanColumnWidgetState extends State<KanbanColumnWidget> {
       accentColor: widget.columnColor,
     );
 
-    // Container with GlobalKey lets us measure the card position even while
-    // childWhenDragging (the ghost) is shown in its place.
+
+
     final child = Container(key: cardKey, child: card);
 
     if (_isDesktop) {
-      // Web / macOS / Windows / Linux: start drag on simple mouse-down + move.
+
       return Draggable<Indicator>(
         data: indicator,
         feedback: feedback,
@@ -231,7 +226,7 @@ class _KanbanColumnWidgetState extends State<KanbanColumnWidget> {
         child: child,
       );
     } else {
-      // Mobile: require a short hold to distinguish drag from scroll.
+
       return LongPressDraggable<Indicator>(
         data: indicator,
         delay: const Duration(milliseconds: 250),
@@ -242,8 +237,6 @@ class _KanbanColumnWidgetState extends State<KanbanColumnWidget> {
     }
   }
 }
-
-// ── Insertion line ─────────────────────────────────────────────────────────
 
 class _InsertionLine extends StatelessWidget {
   final double y;
@@ -276,8 +269,6 @@ class _InsertionLine extends StatelessWidget {
     );
   }
 }
-
-// ── Column header ─────────────────────────────────────────────────────────────
 
 class _ColumnHeader extends StatelessWidget {
   final String name;

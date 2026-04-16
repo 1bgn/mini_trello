@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
 
-/// Retries requests that fail with a transient network error.
-/// Uses exponential back-off: 500ms, 1000ms, 2000ms.
 class RetryInterceptor extends Interceptor {
   final Dio dio;
   final int maxRetries;
@@ -25,7 +23,7 @@ class RetryInterceptor extends Interceptor {
       return handler.next(err);
     }
 
-    final delay = Duration(milliseconds: 500 * (1 << retries)); // 500, 1000, 2000
+    final delay = Duration(milliseconds: 500 * (1 << retries));
     await Future<void>.delayed(delay);
 
     final options = err.requestOptions

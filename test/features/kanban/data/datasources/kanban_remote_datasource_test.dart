@@ -7,11 +7,7 @@ import 'package:mini_trello/core/network/api_client.dart';
 import 'package:mini_trello/features/kanban/data/datasources/kanban_remote_datasource.dart';
 import 'package:mini_trello/features/kanban/data/models/indicator_model.dart';
 
-// ── Mock ──────────────────────────────────────────────────────────────────────
-
 class MockApiClient extends Mock implements ApiClient {}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 Response<dynamic> _response(dynamic data, {int status = 200}) => Response(
       data: data,
@@ -43,8 +39,6 @@ Map<String, dynamic> _item({
       'order': order,
     };
 
-// ── Tests ─────────────────────────────────────────────────────────────────────
-
 void main() {
   late MockApiClient client;
   late KanbanRemoteDataSourceImpl dataSource;
@@ -54,7 +48,7 @@ void main() {
     dataSource = KanbanRemoteDataSourceImpl(client);
   });
 
-  // Helper: stub any POST to return [data].
+
   void stubPost(dynamic data, {int status = 200}) {
     when(() => client.post(any(), data: any(named: 'data')))
         .thenAnswer((_) async => _response(data, status: status));

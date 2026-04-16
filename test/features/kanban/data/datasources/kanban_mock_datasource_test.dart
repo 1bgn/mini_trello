@@ -15,7 +15,7 @@ void main() {
   test('contains both folder items and task items', () async {
     final items = await datasource.getIndicators();
 
-    // Folder items: indicator_to_mo_id is referenced as parent_id by other items
+
     final allParentIds = items
         .where((i) => i.parentId != null)
         .map((i) => i.parentId!)
@@ -34,7 +34,7 @@ void main() {
     final task = before.firstWhere((i) => i.parentId != null);
     final originalParent = task.parentId!;
 
-    // Find a different folder to move it to
+
     final otherFolder = before
         .firstWhere((i) => i.indicatorToMoId != originalParent && i.parentId == null);
 
@@ -86,7 +86,7 @@ void main() {
   test('saveIndicatorField with unknown id does not throw', () async {
     await expectLater(
       datasource.saveIndicatorField(
-        indicatorToMoId: 0, // non-existent
+        indicatorToMoId: 0,
         fields: {'parent_id': '100'},
       ),
       completes,
